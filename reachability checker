@@ -1,0 +1,27 @@
+# File: reachability_checker.py
+import socket
+import time
+
+host = input("Enter hostname or IP: ").strip()
+start = time.time()
+
+try:
+    # Resolve host
+    ip = socket.gethostbyname(host)
+
+    # Try TCP connection on port 80
+    with socket.create_connection((ip, 80), timeout=3):
+        status = True
+except Exception:
+    # Safely handle resolution failure vs connection failure
+    try:
+        ip = socket.gethostbyname(host)
+    except Exception:
+        ip = "Not resolved"
+    status = False
+
+print("\n--- Results ---")
+print("Host:", host)
+print("IP Address:", ip)
+print("Reachable:", status)
+print("Time taken:", int((time.time() - start) * 1000), "ms")
