@@ -1,0 +1,37 @@
+# File: network_tool_runner.py
+import platform
+import shutil
+import subprocess
+
+# Detect OS to handle cross-platform ping arguments
+is_windows = platform.system().lower() == "windows"
+ping_count_flag = "-n" if is_windows else "-c"
+
+TOOLS = {
+    "ping": ["ping", ping_count_flag, "4", "8.8.8.8"],
+    "netstat": ["netstat", "-an"],
+    "nmap": ["nmap", "-F", "127.0.0.1"],
+}
+
+with open("tool_report.txt", "w") as report:
+    for name, cmd in TOOLS.items():
+        report.write(f"\n===== {name.upper()} =====\n")
+
+        # Verify tool exists before running
+        if shutil.which(cmd[0]) is None:
+            report.write(f"Error: {name} tool is not installed on this system.\n")
+            continue
+
+        try:
+            # Safely run command with a timeout
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=15, check=False
+            )
+            # Write stdout, fall back to stderr if stdout is empty
+            report.write(result.stdout or result.stderr or "No output returned.\n")
+        except subprocess.TimeoutExpired:
+            report.write(f"Error: Command timed out after 15 seconds.\n")
+        except Exception as e:
+            report.write(f"Error running tool: {str(e)}\n")
+
+print("Tool report saved as tool_report.txt")
