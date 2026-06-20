@@ -1,0 +1,14 @@
+# File name Port_checker.py
+import socket
+
+ports = {21: "FTP", 22: "SSH", 25: "SMTP", 53: "DNS", 80: "HTTP", 443: "HTTPS"}
+host = input("Enter host or IP: ").strip()
+
+print(f"\nScanning host: {host}\n" + "-" * 30)
+
+for port, service in ports.items():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(1.5)
+        # connect_ex returns 0 on success
+        status = "open" if s.connect_ex((host, port)) == 0 else "closed"
+        print(f"Port {port:<3} ({service:<5}) is {status}")
